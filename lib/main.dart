@@ -38,7 +38,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
       final jsonData = json.decode(response.body);
       setState(() {
         _articles = (jsonData['results'] as List)
-            .map((item) => Article.fromJson(item))
+            .map((item) => Article.fromJson(item, title: jsonData))
             .toList();
       });
     } else {
@@ -48,6 +48,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    BuildContext searchValue;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
@@ -58,7 +59,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
               },
               icon: Icon(Icons.search))
         ],
-        title: Text(' NY Most Popular Articles'),
+        title: Text("Ny Popular Articles"),
         backgroundColor: primaryColor,
       ),
       body: ListView.builder(
@@ -87,6 +88,11 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
   }
 }
 
+final fieldText = TextEditingController();
+void clearText(String query) {
+  fieldText.clear();
+}
+
 class Mydelegete extends SearchDelegate {
   @override
   Widget? buildLeading(BuildContext context) => IconButton(
@@ -100,31 +106,20 @@ class Mydelegete extends SearchDelegate {
             onPressed: () {
               if (query.isEmpty) {
                 close(context, null);
-              } else {
-                query;
-              }
+              } else
+                (query.isNotEmpty);
+              {}
             },
             icon: Icon(Icons.clear))
       ];
 
   @override
-  Widget buildResults(BuildContext context) => Center(
-        child: Text(
-          query,
-          style: TextStyle(fontSize: 64),
-        ),
+  Widget buildResults(BuildContext context) => Container(
+        margin: EdgeInsets.only(left: 10),
+        padding: EdgeInsets.all(15),
       );
-
   @override
-  Widget buildSuggestions(BuildContext context) {
-    List<String> suggestions = ["Oscar", "Silicon Valley"];
-
-    return ListView.builder(
-        itemCount: suggestions.length,
-        itemBuilder: (context, index) {
-          final suggestion = suggestions[index];
-        });
-  }
+  Widget buildSuggestions(BuildContext context) => ListView();
 }
 
 class ArticleDetailsScreen extends StatelessWidget {
@@ -183,10 +178,9 @@ class Article {
     required this.fullText,
   });
 
-  factory Article.fromJson(Map<String, dynamic> json) {
+  factory Article.fromJson(Map<String, dynamic> json, {required title}) {
     final media = json['media']?.first['media-metadata']?.first;
     final imageUrl = media != null ? media['url'] : '';
-    final fulltext = json['text'];
 
     return Article(
       title: json['title'],
